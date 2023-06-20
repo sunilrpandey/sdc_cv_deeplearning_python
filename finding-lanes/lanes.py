@@ -1,6 +1,7 @@
 import cv2
+import os
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 def make_coordinates(image, line_parameters):
     slope, intercept = line_parameters
@@ -23,12 +24,16 @@ def average_slope_intercept(image, lines):
             left_fit.append((slope, intercept))
         else: #Right lane lines have positive slop
             right_fit.append((slope, intercept))
-    left_fit_average = np.average(left_fit, axis=0) #to get average over columns, because each list includes slopes in the first column and intercepts in the second column
-    right_fit_average = np.average(right_fit, axis=0)
-    left_line = make_coordinates(image, left_fit_average)
-    right_line = make_coordinates(image, right_fit_average)
+            
+    if len(left_fit) and len(right_fit):
+        left_fit_average = np.average(left_fit, axis=0) #to get average over columns, because each list includes slopes in the first column and intercepts in the second column
+        right_fit_average = np.average(right_fit, axis=0)
+        left_line = make_coordinates(image, left_fit_average)
+        right_line = make_coordinates(image, right_fit_average)
+        averaged_lines = [left_line, right_line]
+        return averaged_lines
 
-    return np.array([left_line, right_line])
+    # return np.array([left_line, right_line])
 
 def canny(image):
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
@@ -56,34 +61,51 @@ def region_of_interest(image):
 
     return masked_image
 
-# image = cv2.imread('test_image.jpg')
-# lane_image = np.copy(image)
-# canny_image = canny(lane_image)
-# cropped_image = region_of_interest(canny_image)
-# lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
-# averaged_lines = average_slope_intercept(lane_image, lines)
-# line_image = display_line(lane_image, averaged_lines)
-# combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
-
-# cv2.imshow("result", combo_image)
-# cv2.waitKey(0)
-
-cap = cv2.VideoCapture("test2.mp4")
-while(cap.isOpened()):
-    _, frame = cap.read() #decodes every video frame and return two values. 1st one is a boolean, which we leave it as blank, and the 2nd one is the frame which is an image
+def loadImage():
+    image_path = os.getcwd() + "\\finding_lanes\\" + "test_image.jpg"
+    # image_path = "test_image.jpg"
+    image = cv2.imread(image_path)
+    lane_image = np.copy(image)
+    canny_image = canny(lane_image)
+    # showPlotsForImage(canny_image)
+    cropped_canny_image = region_of_interest(canny_image)
     
-    #copy of the above algorithm, only replacing the lange image with the current fram in the video
-    canny_image = canny(frame)
-    cropped_image = region_of_interest(canny_image)
-    lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
-    averaged_lines = average_slope_intercept(frame, lines)
-    line_image = display_line(frame, averaged_lines)
-    combo_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
-
+    lines = cv2.HoughLinesP(cropped_canny_image,2,np.pi/180,100,np.array([]),minLineLength=40,maxLineGap=5)
+    # line_image = display_lines(lane_image,lines)
+    averaged_lines = average_slope_intercept(lane_image, lines)
+    line_image = display_line(lane_image,averaged_lines)
+    
+    # overlay lines on top of given image
+    combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
+    
     cv2.imshow("result", combo_image)
+    cv2.waitKey(0)
     
-    #closing video upon pressing the "q" key on the keyboard
-    if cv2.waitKey(1) & 0xFF == ord('q'): #waiting 1 milisecond between frames #masking the integer value we get from waitKey to 8 bits to ensure cross platform compatibility of code
-        break
-cap.release()
-cv2.destroyAllWindows()
+def loadVideo() :
+    video_path = os.getcwd() + "\\finding_lanes\\" + "test2.mp4"
+    # video_path = "test_image.jpg"
+    
+    cap = cv2.VideoCapture(video_path)
+    while(cap.isOpened()):
+        _, frame = cap.read() #decodes every video frame and return two values. 1st one is a boolean, which we leave it as blank, and the 2nd one is the frame which is an image
+        
+        #copy of the above algorithm, only replacing the lange image with the current fram in the video
+        canny_image = canny(frame)
+        cropped_image = region_of_interest(canny_image)
+        lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
+        averaged_lines = average_slope_intercept(frame, lines)
+        line_image = display_line(frame, averaged_lines)
+        combo_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
+
+        cv2.imshow("result", combo_image)
+        
+        #closing video upon pressing the "q" key on the keyboard
+        if cv2.waitKey(1) & 0xFF == ord('q'): #waiting 1 milisecond between frames #masking the integer value we get from waitKey to 8 bits to ensure cross platform compatibility of code
+            break
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    # loadImage()
+    loadVideo()
