@@ -37,7 +37,7 @@ def plot_decision_boundary(n_pts, X, y, model):
     grid = np.c_[xx_, yy_]
     pred_func = model.predict(grid)
     z = pred_func.reshape(xx.shape)
-    # plt.contourf(xx, yy, z)
+    plt.contourf(xx, yy, z)
     
     plt.scatter(X[:n_pts,0], X[:n_pts,1])
     plt.scatter(X[n_pts:,0], X[n_pts:,1])
@@ -72,7 +72,7 @@ def demoPrediction():
     plotParam(h,'loss')            
     plot_decision_boundary(n_pts, X, y, model)  
     
-    prediction = predictForValues(model, 7.5, 5)    
+    prediction = predictForValues(model, x = 7.5, y = 5)    
     print("prediction is: ",prediction)
 
 demoPrediction()
