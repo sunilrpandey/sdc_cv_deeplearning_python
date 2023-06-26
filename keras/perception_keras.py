@@ -45,11 +45,24 @@ import matplotlib.pyplot as plt
 
 # plt.contourf(xx, yy, z): This line creates a filled contour plot using the contourf function from matplotlib.pyplot. It visualizes the decision boundary by filling different regions of the plot with colors corresponding to the predicted class probabilities. The xx and yy arrays represent the coordinates of the grid, and z represents the predicted class probabilities for each point in the grid.
 
-def trainModel(X,y,n_pts):
+def populateData():
+    n_pts = 500
+    np.random.seed(0)
+    Xa = np.array([np.random.normal(13, 2, n_pts),
+                np.random.normal(12, 2, n_pts)]).T
+    Xb = np.array([np.random.normal(8, 2, n_pts),
+                np.random.normal(6, 2, n_pts)]).T
+
+    X = np.vstack((Xa, Xb))
+    y = np.matrix(np.append(np.zeros(n_pts), np.ones(n_pts))).T
+    
     # call to scatter for two sets of data, to get differnt colors
     plt.scatter(X[:n_pts,0], X[:n_pts,1])
     plt.scatter(X[n_pts:,0], X[n_pts:,1])
     plt.show() # If I dont show it points are blue/orange dots are coming and not syncing with Notebook
+    
+    return n_pts, X, y
+def trainModel(X,y):
     
     model = Sequential()
     model.add(Dense(units=1, input_shape=(2,), activation='sigmoid'))
@@ -65,7 +78,7 @@ def plotParam(h,param):
     plt.legend([param])
     plt.show()
 
-def plot_decision_boundary(n_pts, X, y, model):
+def plot_decision_boundary(n_pts, X, y, model):  
     x_span = np.linspace(min(X[:,0]) - 1, max(X[:,0]) + 1)
     y_span = np.linspace(min(X[:,1]) - 1, max(X[:,1]) + 1)
     xx, yy = np.meshgrid(x_span, y_span)
@@ -86,24 +99,13 @@ def predictForValues(model, x, y):
     plt.show()
     return prediction
  
-def populateData():
-    n_pts = 500
-    np.random.seed(0)
-    Xa = np.array([np.random.normal(13, 2, n_pts),
-                np.random.normal(12, 2, n_pts)]).T
-    Xb = np.array([np.random.normal(8, 2, n_pts),
-                np.random.normal(6, 2, n_pts)]).T
-
-    X = np.vstack((Xa, Xb))
-    y = np.matrix(np.append(np.zeros(n_pts), np.ones(n_pts))).T
-    
-    return n_pts, X, y
         
 def demoPrediction():
     
     n_pts, X, y = populateData()
     
-    h, model = trainModel(X,y,n_pts)    
+    h, model = trainModel(X,y)    
+    
     plotParam(h,'accuracy')
     plotParam(h,'loss')            
     plot_decision_boundary(n_pts, X, y, model)  
