@@ -62,8 +62,7 @@ def region_of_interest(image):
     return masked_image
 
 def loadImage():
-    image_path = os.getcwd() + "\\finding_lanes\\" + "test_image.jpg"
-    # image_path = "test_image.jpg"
+    image_path = os.path.join(os.path.dirname(__file__), "test_image.jpg")
     image = cv2.imread(image_path)
     lane_image = np.copy(image)
     canny_image = canny(lane_image)
@@ -82,10 +81,12 @@ def loadImage():
     cv2.waitKey(0)
     
 def loadVideo() :
-    video_path = os.getcwd() + "\\finding_lanes\\" + "test2.mp4"
-    # video_path = "test_image.jpg"
+    # print(os.path.dirname(__file__))
+    # print(os.path.join(os.path.dirname(__file__), "test2.mp4"))
+    video_path = os.path.join(os.path.dirname(__file__), "test2.mp4")
     
     cap = cv2.VideoCapture(video_path)
+    
     while(cap.isOpened()):
         _, frame = cap.read() #decodes every video frame and return two values. 1st one is a boolean, which we leave it as blank, and the 2nd one is the frame which is an image
         
@@ -107,5 +108,5 @@ def loadVideo() :
 
 
 if __name__ == "__main__":
-    # loadImage()
-    loadVideo()
+    loadImage()
+    # loadVideo()
